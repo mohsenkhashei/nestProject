@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
+
 import { ProductsModule } from './products/products.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Product } from './products/product.entity';
+
+import { AuthModule } from './auth/auth.module';
+import { AccountModule } from './account/account.module';
 
 @Module({
   imports: [
@@ -15,10 +17,12 @@ import { Product } from './products/product.entity';
       password: 'root',
       database: 'postgres',
       autoLoadEntities: true,
-      // entities: [],
+
       entities: [__dirname + '../**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
+    AuthModule,
+    AccountModule,
   ],
   controllers: [],
   providers: [],
