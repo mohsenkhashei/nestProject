@@ -25,6 +25,8 @@ import { configValidationSchema } from './config/config.schema';
           database: configService.get('DB_DATABASE'),
           autoLoadEntities: true,
           entities: [__dirname + '../**/*.entity{.ts,.js}'],
+          migrations: [__dirname + '../**/migrations/*{.ts,.js}'],
+          migrationsTableName: 'migrations',
           synchronize: true,
         };
       },
