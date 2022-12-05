@@ -7,10 +7,12 @@ import { ProductsRepository } from './products.repository';
 import { Product } from './product.entity';
 
 import { productCategory } from './product-category.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ProductsRepository, Product, productCategory]),
+    AuthModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

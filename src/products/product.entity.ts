@@ -1,3 +1,5 @@
+import { Exclude } from 'class-transformer';
+import { User } from 'src/auth/user.entity';
 import {
   Column,
   Entity,
@@ -22,9 +24,21 @@ export class Product {
   @Column()
   price: number;
 
-  @ManyToOne(() => productCategory, (productCategory) => productCategory.id)
+  @ManyToOne(() => productCategory, (productCategory) => productCategory.id, {
+    eager: true,
+  })
   @JoinColumn()
   category: productCategory;
+
+  @Column({
+    default: 0,
+  })
+  isConfirmed: number;
+
+  @ManyToOne(() => User, (user) => user.id, { eager: false })
+  @JoinColumn()
+  @Exclude({ toPlainOnly: true })
+  userId: User;
 
   @UpdateDateColumn()
   updatedAt: Date;
