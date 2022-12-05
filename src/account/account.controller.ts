@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
 import { AccountService } from './account.service';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -10,8 +11,8 @@ export class AccountController {
   constructor(private accountService: AccountService) {}
 
   @Get()
-  getAllAccounts(): Promise<User[]> {
-    return this.accountService.getAllAccounts();
+  getAllAccounts(@GetUser() user: User): Promise<User[]> {
+    return this.accountService.getAllAccounts(user);
   }
 
   @Post()

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { userRole } from 'src/auth/user-role.enum';
 import { User } from 'src/auth/user.entity';
@@ -12,7 +16,16 @@ export class AccountService {
     @InjectRepository(User) private usersRepository: UsersRepository,
   ) {}
 
-  async getAllAccounts(): Promise<User[]> {
+  async getAllAccounts(user: User): Promise<User[]> {
+    let condition;
+    if (user.role === userRole.ADMIN) {
+      condition = [{ role: userRole.SUPPORT }, { role: userRole.USER }];
+    } else if (user.role === userRole.SUPPORT) {
+      condition = [{ role: userRole.SUPPORT }];
+    } else {
+      throw new ForbiddenException('You are not allowed to operation');
+    }
+
     const result = await this.usersRepository.find({
       select: {
         id: true,
@@ -21,7 +34,7 @@ export class AccountService {
         role: true,
         updatedAt: true,
       },
-      where: [{ role: userRole.SUPPORT }, { role: userRole.USER }],
+      where: condition,
     });
     if (result) {
       return result;
