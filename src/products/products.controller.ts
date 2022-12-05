@@ -61,4 +61,8 @@ export class ProductsController {
     console.log('Update');
     return this.productsService.updateProduct(id, updateProductDto, user);
   }
+  @Get('/confirm/:id')
+  confirm(@Param('id') id: number, @GetUser() user: User): Promise<Product> {
+    return this.productsService.confirmUpdate(id, user);
+  }
 }

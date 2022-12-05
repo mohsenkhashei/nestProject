@@ -11,4 +11,6 @@ export class CreateProductDto {
   price: number;
 
   category: productCategory;
+
+  isConfirmed: boolean;
 }

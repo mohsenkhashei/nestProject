@@ -1,23 +1,25 @@
 import {
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { getProductsFilterDto } from './dto/filter-product.dto';
-
 import { ProductsRepository } from './products.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './product.entity';
 import { User } from 'src/auth/user.entity';
-
+import { userRole } from 'src/auth/user-role.enum';
+import { Logger } from '@nestjs/common';
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productsRepository: ProductsRepository,
   ) {}
+  private logger = new Logger('Product Service');
 
   async getProducts(
     filterDto: getProductsFilterDto,
@@ -59,8 +61,16 @@ export class ProductsService {
       }
     }
 
-    const products = await query.getMany();
-    return products;
+    try {
+      const products = await query.getMany();
+      return products;
+    } catch (error) {
+      this.logger.error(error);
+      `Failed to get product for user ${
+        user.username
+      }. Filters: ${JSON.stringify(filterDto)}`;
+      throw new InternalServerErrorException();
+    }
   }
 
   async getProductById(id: number, user: User): Promise<Product> {
@@ -86,17 +96,23 @@ export class ProductsService {
     user: User,
   ): Promise<Product> {
     const { title, description, price, category } = createProductDto;
-    const product = this.productsRepository.create({
-      title,
-      description,
-      price,
-      category,
-      userId: user,
-    });
+    if (user.role == userRole.USER) {
+      const product = this.productsRepository.create({
+        title,
+        description,
+        price,
+        category,
+        userId: user,
+        isConfirmed: 0,
+      });
 
-    await this.productsRepository.save(product);
-    return product;
+      await this.productsRepository.save(product);
+      return product;
+    } else {
+      throw new ForbiddenException('you are not allowed to create product');
+    }
   }
+
   async deleteProduct(id: number, user: User): Promise<void> {
     let result;
     if (user.role === 'admin' || user.role === 'support') {
@@ -122,7 +138,7 @@ export class ProductsService {
   ): Promise<Product> {
     const { title, description, price, category } = updateProductDto;
     const product = await this.getProductById(id, user);
-    if (user.role === 'user' && product.isConfirmed === 0) {
+    if (user.role === userRole.USER && product.isConfirmed === 0) {
       product.title = title;
       product.description = description;
       product.price = price;
@@ -133,6 +149,23 @@ export class ProductsService {
       throw new ForbiddenException(
         `You are not allowed to do this operations because you are not the owner or your product is confirmed`,
       );
+    }
+  }
+
+  async confirmUpdate(id: number, user: User): Promise<Product> {
+    if (user.role == userRole.SUPPORT) {
+      const result = await this.productsRepository.findOne({
+        where: { id: id },
+      });
+      console.log(result);
+
+      if (result) {
+        result.isConfirmed = 1;
+        await this.productsRepository.save(result);
+        return result;
+      } else {
+        throw new NotFoundException(`product with ID: ${id} not found`);
+      }
     }
   }
 }
