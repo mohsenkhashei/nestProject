@@ -16,6 +16,7 @@ then change the config file in config folder `.env.stage.dev` with your database
 ## Running the app
 
 ```bash
+$ npm install
 # development
 $ npm run start:dev
 ```
