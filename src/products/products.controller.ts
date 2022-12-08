@@ -14,12 +14,15 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { getProductsFilterDto } from './dto/filter-product.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { Product } from './product.entity';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
+import { Roles } from 'src/auth/roles.decorators';
+import { userRole } from 'src/auth/user-role.enum';
+import { JwtGuard } from 'src/auth/jwt.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
 @Controller('products')
-@UseGuards(AuthGuard())
+@UseGuards(JwtGuard, RolesGuard)
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
@@ -39,6 +42,7 @@ export class ProductsController {
     return this.productsService.getProductById(id, user);
   }
 
+  @Roles(userRole.USER)
   @Post()
   createProduct(
     @Body() createProductDto: CreateProductDto,
@@ -58,9 +62,10 @@ export class ProductsController {
     @Body() updateProductDto: UpdateProductDto,
     @GetUser() user: User,
   ): Promise<Product> {
-    console.log('Update');
     return this.productsService.updateProduct(id, updateProductDto, user);
   }
+
+  @Roles(userRole.SUPPORT, userRole.ADMIN)
   @Get('/confirm/:id')
   confirm(@Param('id') id: number, @GetUser() user: User): Promise<Product> {
     return this.productsService.confirmUpdate(id, user);

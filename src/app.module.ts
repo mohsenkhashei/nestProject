@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { AccountModule } from './account/account.module';
 import { configValidationSchema } from './config/config.schema';
+
 @Module({
   imports: [
     ConfigModule.forRoot({

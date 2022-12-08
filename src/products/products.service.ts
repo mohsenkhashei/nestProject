@@ -74,16 +74,13 @@ export class ProductsService {
   }
 
   async getProductById(id: number, user: User): Promise<Product> {
-    let result: Product;
+    const whereClause = { id: id };
     if (user.role === 'user') {
-      result = await this.productsRepository.findOne({
-        where: { id: id, userId: user },
-      });
-    } else if (user.role === 'admin' || user.role === 'support') {
-      result = await this.productsRepository.findOne({
-        where: { id: id },
-      });
+      Object.assign(whereClause, { userId: user });
     }
+    const result = await this.productsRepository.findOne({
+      where: whereClause,
+    });
     if (!result) {
       throw new NotFoundException(`Product with ID: ${id} not found`);
     } else {
@@ -96,41 +93,31 @@ export class ProductsService {
     user: User,
   ): Promise<Product> {
     const { title, description, price, category } = createProductDto;
-    if (user.role == userRole.USER) {
-      const product = this.productsRepository.create({
-        title,
-        description,
-        price,
-        category,
-        userId: user,
-        isConfirmed: 0,
-      });
+    const product = this.productsRepository.create({
+      title,
+      description,
+      price,
+      category,
+      userId: user,
+      isConfirmed: 0,
+    });
 
-      await this.productsRepository.save(product);
-      return product;
-    } else {
-      throw new ForbiddenException('you are not allowed to create product');
-    }
+    await this.productsRepository.save(product);
+    return product;
   }
 
   async deleteProduct(id: number, user: User): Promise<void> {
-    let result;
-    if (user.role === 'admin' || user.role === 'support') {
-      result = await this.productsRepository.delete(id);
-    } else {
-      const found = await this.productsRepository.findOne({
-        where: { id: id, userId: user, isConfirmed: 0 },
-      });
-      if (found) {
-        result = await this.productsRepository.delete(id);
-      } else {
-        throw new NotFoundException(`Product with ID: ${id} not found`);
-      }
+    const whereClause = { id: id };
+    if (user.role === 'user') {
+      Object.assign(whereClause, { userId: user, isConfirmed: 0 });
     }
+    const result = await this.productsRepository.delete(whereClause);
+
     if (result.affected === 0) {
       throw new NotFoundException(`Product with ID: ${id} not found`);
     }
   }
+
   async updateProduct(
     id: number,
     updateProductDto: UpdateProductDto,
@@ -138,34 +125,28 @@ export class ProductsService {
   ): Promise<Product> {
     const { title, description, price, category } = updateProductDto;
     const product = await this.getProductById(id, user);
-    if (user.role === userRole.USER && product.isConfirmed === 0) {
-      product.title = title;
-      product.description = description;
-      product.price = price;
-      product.category = category;
-      await this.productsRepository.save(product);
-      return product;
-    } else {
-      throw new ForbiddenException(
-        `You are not allowed to do this operations because you are not the owner or your product is confirmed`,
-      );
+    if (user.role === userRole.USER) {
+      product.isConfirmed = 0;
     }
+    product.title = title;
+    product.description = description;
+    product.price = price;
+    product.category = category;
+    await this.productsRepository.save(product);
+    return product;
   }
 
   async confirmUpdate(id: number, user: User): Promise<Product> {
-    if (user.role == userRole.SUPPORT) {
-      const result = await this.productsRepository.findOne({
-        where: { id: id },
-      });
-      console.log(result);
+    const result = await this.productsRepository.findOne({
+      where: { id: id },
+    });
 
-      if (result) {
-        result.isConfirmed = 1;
-        await this.productsRepository.save(result);
-        return result;
-      } else {
-        throw new NotFoundException(`product with ID: ${id} not found`);
-      }
+    if (result) {
+      result.isConfirmed = 1;
+      await this.productsRepository.save(result);
+      return result;
+    } else {
+      throw new NotFoundException(`product with ID: ${id} not found`);
     }
   }
 }

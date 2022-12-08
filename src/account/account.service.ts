@@ -20,10 +20,9 @@ export class AccountService {
     let condition;
     if (user.role === userRole.ADMIN) {
       condition = [{ role: userRole.SUPPORT }, { role: userRole.USER }];
-    } else if (user.role === userRole.SUPPORT) {
-      condition = [{ role: userRole.SUPPORT }];
-    } else {
-      throw new ForbiddenException('You are not allowed to operation');
+    }
+    if (user.role === userRole.SUPPORT) {
+      condition = [{ role: userRole.USER }];
     }
 
     const result = await this.usersRepository.find({
