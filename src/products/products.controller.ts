@@ -21,11 +21,24 @@ import { Roles } from 'src/auth/roles.decorators';
 import { userRole } from 'src/auth/user-role.enum';
 import { JwtGuard } from 'src/auth/jwt.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+
+@ApiBearerAuth()
+@ApiTags('Products')
 @Controller('products')
 @UseGuards(JwtGuard, RolesGuard)
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
+  @ApiOperation({ summary: 'Getting All Products or with filter/category' })
+  @ApiOkResponse({ type: Product, isArray: true })
   @Get()
   getProducts(
     @Query() filterDto: getProductsFilterDto,
@@ -34,14 +47,19 @@ export class ProductsController {
     return this.productsService.getProducts(filterDto, user);
   }
 
+  @ApiOperation({ summary: 'Get Specific Product' })
+  @ApiOkResponse({ type: Product })
+  @ApiResponse({ status: 404, description: `Product with ID: id not found` })
   @Get('/:id')
-  getTaskById(
+  getProductById(
     @Param('id') id: number,
     @GetUser() user: User,
   ): Promise<Product> {
     return this.productsService.getProductById(id, user);
   }
 
+  @ApiOperation({ summary: 'Create Product' })
+  @ApiCreatedResponse({ type: Product })
   @Roles(userRole.USER)
   @Post()
   createProduct(
@@ -51,11 +69,16 @@ export class ProductsController {
     return this.productsService.createProduct(createProductDto, user);
   }
 
+  @ApiOperation({ summary: 'Deleting Specific Product' })
+  @ApiOkResponse({ description: 'response will be empty' })
+  @ApiResponse({ status: 404, description: `Product with ID: id not found` })
   @Delete('/:id')
   deleteProduct(@Param('id') id: number, @GetUser() user: User): Promise<void> {
     return this.productsService.deleteProduct(id, user);
   }
 
+  @ApiOperation({ summary: 'Update Specific Product' })
+  @ApiOkResponse({ type: Product })
   @Patch('/:id')
   updateProduct(
     @Param('id') id: number,
@@ -65,9 +88,14 @@ export class ProductsController {
     return this.productsService.updateProduct(id, updateProductDto, user);
   }
 
+  @ApiOperation({
+    summary: 'Confirm Specific Product Allowed By SUPPORT/ADMIN role',
+  })
+  @ApiOkResponse({ type: Product })
+  @ApiResponse({ status: 404, description: `Product with ID: id not found` })
   @Roles(userRole.SUPPORT, userRole.ADMIN)
   @Get('/confirm/:id')
-  confirm(@Param('id') id: number, @GetUser() user: User): Promise<Product> {
-    return this.productsService.confirmUpdate(id, user);
+  confirm(@Param('id') id: number): Promise<Product> {
+    return this.productsService.confirmUpdate(id);
   }
 }

@@ -64,6 +64,7 @@ export class AuthService {
       throw new UnauthorizedException('please check your login credentials');
     }
   }
+
   async createAdmin(): Promise<{ username: string; password: string }> {
     const username = this.configService.get('ADMIN_USER');
     const password = this.configService.get('ADMIN_PASS');

@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   Entity,
@@ -11,15 +12,18 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ApiProperty()
   @Column({ nullable: true })
   username: string;
 
+  @ApiProperty()
   @Column({ nullable: true })
   password: string;
 
   @Column({ nullable: true })
   code: string;
 
+  @ApiProperty()
   @Column({
     type: 'enum',
     enum: userRole,
