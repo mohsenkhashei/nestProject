@@ -8,11 +8,17 @@ import { Product } from './product.entity';
 import { ConfigModule } from '@nestjs/config';
 import { productCategory } from './product-category.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { ProductCategoryRepository } from './product-category.repository';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([ProductsRepository, Product, productCategory]),
+    TypeOrmModule.forFeature([
+      ProductsRepository,
+      Product,
+      ProductCategoryRepository,
+      productCategory,
+    ]),
     AuthModule,
   ],
   controllers: [ProductsController],

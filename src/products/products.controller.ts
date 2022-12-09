@@ -29,6 +29,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { productCategory } from './product-category.entity';
 
 @ApiBearerAuth()
 @ApiTags('Products')
@@ -36,6 +38,17 @@ import {
 @UseGuards(JwtGuard, RolesGuard)
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
+
+  @ApiTags('Products Category')
+  @ApiOperation({ summary: 'Create Product Category' })
+  @ApiCreatedResponse({ type: productCategory })
+  @Roles(userRole.USER)
+  @Post('/category')
+  createCategory(
+    @Body() createCategoryDto: CreateCategoryDto,
+  ): Promise<productCategory> {
+    return this.productsService.createCategory(createCategoryDto);
+  }
 
   @ApiOperation({ summary: 'Getting All Products or with filter/category' })
   @ApiOkResponse({ type: Product, isArray: true })

@@ -7,16 +7,21 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { getProductsFilterDto } from './dto/filter-product.dto';
 import { ProductsRepository } from './products.repository';
+import { ProductCategoryRepository } from './product-category.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './product.entity';
 import { User } from 'src/auth/user.entity';
 import { userRole } from 'src/auth/user-role.enum';
 import { Logger } from '@nestjs/common';
+import { productCategory } from './product-category.entity';
+import { CreateCategoryDto } from './dto/create-category.dto';
+
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productsRepository: ProductsRepository,
+    private productCategoryRepository: ProductCategoryRepository,
   ) {}
   private logger = new Logger('Product Service');
 
@@ -133,6 +138,25 @@ export class ProductsService {
     product.category = category;
     await this.productsRepository.save(product);
     return product;
+  }
+
+  async createCategory(
+    createCategoryDto: CreateCategoryDto,
+  ): Promise<productCategory> {
+    const { title } = createCategoryDto;
+    const result = await this.productCategoryRepository.findOne({
+      where: { title: title },
+    });
+    if (result) {
+      return result;
+    } else {
+      const category = await this.productCategoryRepository.create({
+        title,
+      });
+
+      await this.productCategoryRepository.save(category);
+      return category;
+    }
   }
 
   async confirmUpdate(id: number): Promise<Product> {
