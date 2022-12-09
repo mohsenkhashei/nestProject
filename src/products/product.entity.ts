@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { User } from 'src/auth/user.entity';
 import {
@@ -12,18 +13,23 @@ import { productCategory } from './product-category.entity';
 
 @Entity()
 export class Product {
+  @ApiProperty()
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ApiProperty()
   @Column()
   title: string;
 
+  @ApiProperty()
   @Column()
   description: string;
 
+  @ApiProperty()
   @Column()
   price: number;
 
+  @ApiProperty({ enum: [productCategory] })
   @ManyToOne(() => productCategory, (productCategory) => productCategory.id, {
     eager: true,
   })

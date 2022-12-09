@@ -136,7 +136,7 @@ export class ProductsService {
     return product;
   }
 
-  async confirmUpdate(id: number, user: User): Promise<Product> {
+  async confirmUpdate(id: number): Promise<Product> {
     const result = await this.productsRepository.findOne({
       where: { id: id },
     });
