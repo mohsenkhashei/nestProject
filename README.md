@@ -23,11 +23,9 @@ $ npm run start:dev
 
 ## Using the app
 
-<<<<<<< HEAD
+
 Api Documentation(Swagger): `http//localhost:3000/doc/` or <br />
-=======
-Api Documentation(Swagger): `localhost:3000/doc/` or <br />
->>>>>>> b2593d5edb69d12a3639efc304b20ca71e7698c9
+
 Postman collection:<br />
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/1566887-791300f1-c861-4722-9d8f-78c4dcbd0d35?action=collection%2Ffork&collection-url=entityId%3D1566887-791300f1-c861-4722-9d8f-78c4dcbd0d35%26entityType%3Dcollection%26workspaceId%3Df20b8551-2f10-4363-b926-f1d77d8643ff)
 
